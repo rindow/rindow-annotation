@@ -1,0 +1,34 @@
+{
+    "name": "rindow/rindow-annotation",
+    "type": "library",
+    "description": "Extract annotations from source code",
+    "keywords": ["rindow","framework","annotation"],
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.3.3",
+        "rindow/rindow-stdlib": "*",
+        "interop-phpobjects/lenient-annotation": "*"
+    },
+    "require-dev": {
+        "rindow/rindow-stdlib": "*",
+        "interop-phpobjects/lenient-annotation": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Rindow\\Annotation\\": "src/"
+        }
+    },
+
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://rindow.github.io/rindow-packagist/packages.json",
+            "options": {
+                "ssl": {
+                    "verify_peer": "true"
+                }
+            }
+        }
+    ],
+    "minimum-stability": "dev"
+}
