@@ -12,3 +12,7 @@ Rindow\Stdlib\Cache\CacheFactory::$enableMemCache = true;
 Rindow\Stdlib\Cache\CacheFactory::$enableFileCache = false;
 //Rindow\Stdlib\Cache\CacheFactory::$notRegister = true;
 Rindow\Stdlib\Cache\CacheFactory::clearCache();
+
+if(!class_exists('PHPUnit\Framework\TestCase')) {
+    include __DIR__.'/travis/patch55.php';
+}
