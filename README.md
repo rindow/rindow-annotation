@@ -1,5 +1,6 @@
 Rindow Annotation Manager
 =========================
+Master: [![Build Status](https://travis-ci.com/rindow/rindow-annotation.png?branch=master)](https://travis-ci.com/rindow/rindow-annotation)
 
 The Annotation Manager Extracts annotations from source code.
 
