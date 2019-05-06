@@ -2,7 +2,6 @@
 namespace RindowTest\Annotation\AnnotationParserTest;
 
 use PHPUnit\Framework\TestCase;
-use Rindow\Stdlib\Cache\CacheFactory;
 // Test Target Classes
 use Rindow\Annotation\Parser;
 use Rindow\Annotation\ElementType;
@@ -23,12 +22,10 @@ class AnnotationParserTest extends TestCase
 {
     public static function setUpBeforeClass()
     {
-		\Rindow\Stdlib\Cache\CacheFactory::clearFileCache(CacheFactory::$fileCachePath.'/annotation/cache');
     }
 
     public static function tearDownAfterClass()
     {
-		\Rindow\Stdlib\Cache\CacheFactory::clearFileCache(CacheFactory::$fileCachePath.'/annotation/cache');
     }
 
     public function setUp()

@@ -11,12 +11,10 @@ class Test extends TestCase
     public static function setUpBeforeClass()
     {
         self::$RINDOW_TEST_RESOURCES = __DIR__.'/../../resources';
-        \Rindow\Stdlib\Cache\CacheFactory::clearFileCache(\Rindow\Stdlib\Cache\CacheFactory::$fileCachePath.'/cache/annotation');
     }
 
     public static function tearDownAfterClass()
     {
-        \Rindow\Stdlib\Cache\CacheFactory::clearFileCache(\Rindow\Stdlib\Cache\CacheFactory::$fileCachePath.'/cache/annotation');
     }
 
     public function setUp()

@@ -4,7 +4,7 @@ namespace Rindow\Annotation;
 use ReflectionClass;
 use ReflectionProperty;
 use ReflectionMethod;
-use Rindow\Stdlib\Cache\CacheHandlerTemplate;
+use Rindow\Stdlib\Cache\ConfigCache\ConfigCacheFactory;
 use Rindow\Annotation\Annotation\Annotation as AnnotationTag;
 use Rindow\Annotation\Annotation\Target as TargetTag;
 use Rindow\Annotation\Annotation\Enum as EnumTag;
@@ -13,8 +13,13 @@ use Interop\Lenient\Annotation\AnnotationReader;
 
 class AnnotationManager implements AnnotationReader
 {
-    private static $cachePath;
-    protected $cacheHandler;
+    protected $cacheFactory;
+    protected $classCache;
+    protected $methodCache;
+    protected $propertyCache;
+    protected $metadataCache;
+    protected $importsCache;
+
     protected $parser;
     protected $nameSpaces;
     protected $ignoreUnknownAnnotationMode;
@@ -22,15 +27,13 @@ class AnnotationManager implements AnnotationReader
     protected $annotationProvider = array();
     protected $notRegisterAnnotationInterface;
     protected $aliases = array();
-/*
-    public static function factory()
+
+    public function __construct($cacheFactory=null)
     {
-        return CacheHandlerTemplate::instanceFactory(__CLASS__,self::$cachePath);
-    }
-*/
-    public function __construct()
-    {
-        $this->cacheHandler = new CacheHandlerTemplate(__CLASS__);
+        if($cacheFactory)
+            $this->cacheFactory = $cacheFactory;
+        else
+            $this->cacheFactory = new ConfigCacheFactory(array('enableCache'=>false));
         $this->nameSpaces = array(__NAMESPACE__.'\\'.'Annotation'=>__NAMESPACE__.'\\'.'Annotation');
         $this->parser = new Parser($this);
         $this->notRegisterAnnotationInterface = __NAMESPACE__.'\NotRegisterAnnotationInterface';
@@ -43,38 +46,48 @@ class AnnotationManager implements AnnotationReader
 
     protected function getClassCache()
     {
-        return $this->cacheHandler->getCache('classdata');
+        if($this->classCache==null)
+            $this->classCache = $this->cacheFactory->create(__CLASS__.'/classdata');
+        return $this->classCache;
     }
 
     protected function getMethodCache()
     {
-        return $this->cacheHandler->getCache('methoddata');
+        if($this->methodCache==null)
+            $this->methodCache = $this->cacheFactory->create(__CLASS__.'/methoddata');
+        return $this->methodCache;
     }
 
     protected function getPropertyCache()
     {
-        return $this->cacheHandler->getCache('propertydata');
+        if($this->propertyCache==null)
+            $this->propertyCache = $this->cacheFactory->create(__CLASS__.'/propertydata');
+        return $this->propertyCache;
     }
 
-    protected function getCache()
+    protected function getMetadataCache()
     {
-        return $this->cacheHandler->getCache('metadata');
+        if($this->metadataCache==null)
+            $this->metadataCache = $this->cacheFactory->create(__CLASS__.'/metadata');
+        return $this->metadataCache;
     }
 
     protected function getImportsCache()
     {
-        return $this->cacheHandler->getCache('imports');
+        if($this->importsCache==null)
+            $this->importsCache = $this->cacheFactory->create(__CLASS__.'/imports');
+        return $this->importsCache;
     }
 
     public function setEnableCache($enableCache=true)
     {
-        $this->cacheHandler->setEnableCache($enableCache);
+        $this->cacheFactory->setEnableCache($enableCache);
     }
 
-    public function setCachePath($cachePath)
-    {
-        $this->cacheHandler->setCachePath($cachePath);
-    }
+    //public function setCachePath($cachePath)
+    //{
+    //    $this->cacheFactory->setCachePath($cachePath);
+    //}
 
     public function addNameSpace($nameSpace)
     {
@@ -152,15 +165,15 @@ class AnnotationManager implements AnnotationReader
             return array();
         $index = $ref->name;
         $classCache = $this->getClassCache();
-        $manager = $this;
-        $metaData = $classCache->get(
+        $metaData = $classCache->getEx(
             $index,
-            false,
-            function ($cache,$index,&$entry) use ($ref,$manager) {
+            function ($cache,$args) {
+                list($ref,$manager) = $args;
                 $entry = new AnnotationMetaData();
                 $entry->classAnnotations = array_values($manager->createClassAnnotations($ref));
-                return true;
-            }
+                return $entry;
+            },
+            array($ref,$this)
         );
         return $metaData->classAnnotations;
     }
@@ -197,15 +210,15 @@ class AnnotationManager implements AnnotationReader
         $classRef  = $ref->getDeclaringClass();
         $index = $classRef->name.'::'.$ref->name;
         $methodCache = $this->getMethodCache();
-        $manager = $this;
-        $metaData = $methodCache->get(
+        $metaData = $methodCache->getEx(
             $index,
-            false,
-            function ($cache,$index,&$entry) use ($ref,$manager) {
+            function ($cache,$args) {
+                list($ref,$manager) = $args;
                 $entry = new AnnotationMetaData();
                 $entry->methodAnnotations = array_values($manager->createMethodAnnotations($ref));
-                return true;
-            }
+                return $entry;
+            },
+            array($ref,$this)
         );
         return $metaData->methodAnnotations;
     }
@@ -242,15 +255,15 @@ class AnnotationManager implements AnnotationReader
             return array();
         $index = $classRef->name.'::$'.$ref->name;
         $propertyCache = $this->getPropertyCache();
-        $manager = $this;
-        $metaData = $propertyCache->get(
+        $metaData = $propertyCache->getEx(
             $index,
-            false,
-            function ($cache,$index,&$entry) use ($ref,$manager) {
+            function ($cache,$args) {
+                list($ref,$manager) = $args;
                 $entry = new AnnotationMetaData();
                 $entry->fieldAnnotations = array_values($manager->createPropertyAnnotations($ref));
-                return true;
-            }
+                return $entry;
+            },
+            array($ref,$this)
         );
         return $metaData->fieldAnnotations;
     }
@@ -373,11 +386,11 @@ class AnnotationManager implements AnnotationReader
     public function addImports($nameSpace,$className,$fileName)
     {
         $importsCache = $this->getImportsCache();
-        if(isset($importsCache[$className])) {
+        if($importsCache->has($className)) {
             return $this;
         }
         $nameSpaceExtractor = new NameSpaceExtractor($fileName);
-        $importsCache[$className] = $nameSpaceExtractor->getImports($nameSpace);
+        $importsCache->set($className,$nameSpaceExtractor->getImports($nameSpace));
         return $this;
     }
 
@@ -398,8 +411,8 @@ class AnnotationManager implements AnnotationReader
         }
         $importsCache = $this->getImportsCache();
         $class = $location['class'];
-        if(isset($importsCache[$class])) {
-            $imports = $importsCache[$class];
+        if($importsCache->has($class)) {
+            $imports = $importsCache->get($class);
             $pieces = explode('\\',$annotationName);
             $alias = array_shift($pieces);
             if(isset($imports[$alias])) {
@@ -487,7 +500,7 @@ class AnnotationManager implements AnnotationReader
         else if(!is_string($annotationClassName))
             throw new Exception\DomainException("the annotation must be a object or a class name.", 1);
             
-        $metaDataCache = $this->getCache();
+        $metaDataCache = $this->getMetadataCache();
         if(!isset($metaDataCache[$annotationClassName]))
             return false;
         return $metaDataCache[$annotationClassName];
@@ -500,14 +513,14 @@ class AnnotationManager implements AnnotationReader
         else if(!is_string($annotationClassName))
             throw new Exception\DomainException("the annotation must be a object or a class name.", 1);
             
-        $metaDataCache = $this->getCache();
+        $metaDataCache = $this->getMetadataCache();
         return $metaDataCache->get($annotationClassName,false);
     }
 /*
     protected function registMetaData(ReflectionClass $classRef,$type=ElementType::TYPE)
     {
         $annotationClassName = $classRef->name;
-        $metaDataCache = $this->getCache();
+        $metaDataCache = $this->getMetadataCache();
         if(isset($metaDataCache[$annotationClassName])) {
             return $metaDataCache[$annotationClassName];
         }
@@ -521,19 +534,19 @@ class AnnotationManager implements AnnotationReader
     protected function registMetaData(ReflectionClass $classRef,$type=ElementType::TYPE)
     {
         $annotationClassName = $classRef->name;
-        $metaDataCache = $this->getCache();
-        $manager = $this;
-        $metaData = $metaDataCache->get(
+        $metaDataCache = $this->getMetadataCache();
+        $metaData = $metaDataCache->getEx(
             $annotationClassName,
-            false,
-            function ($cache,$index,&$entry) use ($classRef,$type,$manager) {
+            function ($cache,$args,&$save) {
+                list($classRef,$type,$manager) = $args;
                 $metaData = $manager->createMetaData($classRef,$type);
                 if($metaData==false) {
+                    $save = false;
                     return false;
                 }
-                $entry = $metaData;
-                return true;
-            }
+                return $metaData;
+            },
+            array($classRef,$type,$this)
         );
         return $metaData;
     }

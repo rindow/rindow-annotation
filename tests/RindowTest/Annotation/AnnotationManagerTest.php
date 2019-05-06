@@ -2,7 +2,6 @@
 namespace RindowTest\Annotation\AnnotationManagerTest;
 
 use PHPUnit\Framework\TestCase;
-use Rindow\Stdlib\Cache\CacheFactory;
 use Rindow\Stdlib\Entity\AbstractEntity;
 use ReflectionClass;
 
@@ -175,12 +174,10 @@ class ManagerTest extends TestCase
     public static function setUpBeforeClass()
     {
         self::$RINDOW_TEST_RESOURCES = __DIR__.'/../../resources';
-        CacheFactory::clearFileCache(CacheFactory::$fileCachePath.'/cache/annotation');
     }
 
     public static function tearDownAfterClass()
     {
-        CacheFactory::clearFileCache(CacheFactory::$fileCachePath.'/cache/annotation');
     }
 
     public function setUp()
