@@ -6,11 +6,11 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.3.3",
-        "rindow/rindow-stdlib": "1.*",
+        "rindow/rindow-stdlib": "*",
         "interop-phpobjects/lenient-annotation": "*"
     },
     "require-dev": {
-        "rindow/rindow-stdlib": "1.*",
+        "rindow/rindow-stdlib": "*",
         "interop-phpobjects/lenient-annotation": "*"
     },
     "autoload": {
