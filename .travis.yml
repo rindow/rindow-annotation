@@ -25,4 +25,4 @@ install:
   - export TRAVIS_PHP_VERSION; sh tests/travis/install-script.sh
 
 script:
-  - sh tests/travis/run-test.sh
+  - TRAVIS_SKIP_TEST=1; export TRAVIS_SKIP_TEST; sh tests/travis/run-test.sh
