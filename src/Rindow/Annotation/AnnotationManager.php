@@ -33,7 +33,7 @@ class AnnotationManager implements AnnotationReader
         if($cacheFactory)
             $this->cacheFactory = $cacheFactory;
         else
-            $this->cacheFactory = new ConfigCacheFactory(array('enableCache'=>false));
+            $this->cacheFactory = new ConfigCacheFactory(array('enableCache'=>false,'type'=>'annotation'));
         $this->nameSpaces = array(__NAMESPACE__.'\\'.'Annotation'=>__NAMESPACE__.'\\'.'Annotation');
         $this->parser = new Parser($this);
         $this->notRegisterAnnotationInterface = __NAMESPACE__.'\NotRegisterAnnotationInterface';
@@ -499,7 +499,7 @@ class AnnotationManager implements AnnotationReader
             $annotationClassName = get_class($annotationClassName);
         else if(!is_string($annotationClassName))
             throw new Exception\DomainException("the annotation must be a object or a class name.", 1);
-            
+
         $metaDataCache = $this->getMetadataCache();
         if(!isset($metaDataCache[$annotationClassName]))
             return false;
@@ -512,7 +512,7 @@ class AnnotationManager implements AnnotationReader
             $annotationClassName = get_class($annotationClassName);
         else if(!is_string($annotationClassName))
             throw new Exception\DomainException("the annotation must be a object or a class name.", 1);
-            
+
         $metaDataCache = $this->getMetadataCache();
         return $metaDataCache->get($annotationClassName,false);
     }

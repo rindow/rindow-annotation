@@ -12,11 +12,11 @@ class Parser
 {
     private static $ignoredTags = array(
         // Documentor tags
-        'abstract'=> true, 'access'=> true, 'api' => true, 'author'=> true, 
-        'category'=> true, 'copyright'=> true, 'deprecated'=> true, 'example'=> true, 
-        'final'=> true, 'filesource'=> true, 'global'=> true, 'ignore'=> true, 
+        'abstract'=> true, 'access'=> true, 'api' => true, 'author'=> true,
+        'category'=> true, 'copyright'=> true, 'deprecated'=> true, 'example'=> true,
+        'final'=> true, 'filesource'=> true, 'global'=> true, 'ignore'=> true,
         'internal'=> true, 'license'=> true, 'inheritdoc' => true, 'link'=> true,
-        'method' => true, 'name'=> true, 'package'=> true, 'param'=> true, 'property' => true, 
+        'method' => true, 'name'=> true, 'package'=> true, 'param'=> true, 'property' => true,
         'propertyread' => true, 'property-read' => true, 'propertywrite' => true,
         'property-write' => true,'return'=> true, 'see'=> true,'since'=> true,
         'source'=> true, 'static'=> true, 'staticvar'=> true, 'subpackage'=> true,
@@ -24,8 +24,9 @@ class Parser
         'usedby'=> true, 'used-by'=> true, 'var'=> true, 'version'=> true,
         'magic' => true, 'serial'=> true, 'exception'=> true,
         // Unsupported Java Annotation
-        'Retention' => true, 'Documented' => true, 
-
+        'Retention' => true, 'Documented' => true,
+        // Monolog
+        'suppress' => true,
     );
 
     protected $manager;
